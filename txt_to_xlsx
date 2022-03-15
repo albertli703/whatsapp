@@ -31,7 +31,7 @@ for i in range(len(chat)):
 content = []
 for i in range(len(chat)):
     try:
-        content.append(chat[i].split(':')[2])
+        content.append(chat[i].split(':',2)[2])
     except IndexError:
         content.append(chat[i])
         
