@@ -1,0 +1,57 @@
+import pandas as pd
+import datetime
+
+filename = input('file to convert?: ')+'.txt'
+file = open(filename)
+
+chat = file.read().splitlines()
+
+date = []
+for i in range(len(chat)):
+    try:
+        datetime.datetime.strptime(chat[i].split(' ')[0][1:], '%d/%m/%Y')
+        date.append(chat[i].split(' ')[0][1:])
+    except:
+        date.append('pass')
+        
+time = []
+for i in range(len(chat)):
+    try:
+        time.append(chat[i].split(' ')[1][:-1])
+    except:
+        time.append('pass')
+
+name = []
+for i in range(len(chat)):
+    try:
+        name.append(chat[i].split('] ')[1].split(':')[0])
+    except:
+        name.append('pass')
+
+content = []
+for i in range(len(chat)):
+    try:
+        content.append(chat[i].split(':', 3)[3])
+    except IndexError:
+        content.append(chat[i])
+        
+df = pd.DataFrame(list(zip(date, time, name, content)), columns = ['date', 'time', 'name', 'content'])
+
+df['need_merge'] = ''
+for i in range(len(df)):
+    if df.date[i] == 'pass':
+        df.need_merge[i] = 1
+    else:
+        df.need_merge[i] = 0
+        
+for i in range(len(df)-1, -1, -1):
+    if df.need_merge[i] == 1:
+        try:
+            df.content[i-1] = df.content[i-1] + '\n' + df.content[i]
+        except:
+            pass
+            
+df = df.drop(df[df.need_merge == 1].index)
+df = df.drop(columns=['need_merge'])
+
+df.to_excel(filename[:-4] + '.xlsx')
